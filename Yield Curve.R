@@ -5,22 +5,20 @@ library(reshape2)
 library(gganimate)
 library(magick)
 
-yield_curve <- read_xml("https://data.treasury.gov/feed.svc/DailyTreasuryYieldCurveRateData?$filter=month(NEW_DATE)%20eq%2010%20and%20year(NEW_DATE)%20eq%202019")
-
 yield_curve <- read_xml("https://data.treasury.gov/feed.svc/DailyTreasuryYieldCurveRateData")
 
-entries <- yield_curve %>% 
+entry_positions <- yield_curve %>% 
   xml_children() %>% 
   xml_name() 
 
-yields <- yield_curve %>% 
+entries <- yield_curve %>% 
   xml_children() %>% 
-  .[which(entries == "entry")] %>% 
+  .[which(entry_positions == "entry")] %>% 
   as_list() 
 
 yield_content <- list()
-for(i in 1:length(yields)){
-  yield_content[[i]] <- yields[[i]] %>% 
+for(i in 1:length(entries)){
+  yield_content[[i]] <- entries[[i]] %>% 
     lapply(unlist) %>% 
     .$content %>% 
     enframe() %>% dcast("key"~name) %>% select(-`"key"`)
